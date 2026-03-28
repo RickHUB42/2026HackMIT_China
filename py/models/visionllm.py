@@ -46,7 +46,7 @@ def find_food(img_path: str, cot: bool = False) -> list[str]:
     )
 
     completion = client.chat.completions.create(
-        model="kimi-k2.5",
+        model="moonshot-v1-8k-vision-preview",
         messages=[
             {
                 "role": "system",
