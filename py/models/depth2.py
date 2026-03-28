@@ -119,6 +119,8 @@ pipe = pipeline(
     local_files_only=True,
 )
 
+print('depth loaded')
+
 
 def getdepth(
     image,
