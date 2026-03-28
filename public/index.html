@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Eco Diet Game</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<!-- Main Page -->
+<div id="mainPage">
+  <div id="gameArea">
+    <div id="skyGradient"></div>
+    <img id="bgLight" class="bg-layer" src="/img/bg/BG_Light.png">
+    <img id="bgDark" class="bg-layer" src="/img/bg/BG_Dark.png">
+    <div id="cloudsContainer"></div>
+    <img id="sunImg" src="/img/UI/sun.gif" class="celestial">
+    <img id="moonImg" src="/img/UI/moon.png" class="celestial">
+    <img id="treeLight" class="tree-layer hidden" src="/img/Tree/Tree_Stage2_Light.png">
+    <img id="treeDark" class="tree-layer hidden" src="/img/Tree/Tree_Stage2_Dark.png">
+    <div id="placedDecos"></div>
+    <div id="cardLeft" class="info-card card-left" onclick="toggleCard('left')">
+      <div class="card-tab">◀</div>
+      <div class="card-content" id="recipeListCard">
+        <h3>Recipe List</h3>
+        <div id="recipeListContent"><p>No meals recorded today</p></div>
+      </div>
+    </div>
+    <div id="cardRight" class="info-card card-right" onclick="toggleCard('right')">
+      <div class="card-tab">◀</div>
+      <div class="card-inner" onclick="event.stopPropagation()">
+        <div class="card-tabs">
+          <span class="card-tab-btn active" data-tab="nutrition" onclick="switchRightTab('nutrition')">Nutrition</span>
+          <span class="card-tab-btn" data-tab="treestatus" onclick="switchRightTab('treestatus')">Tree+CE</span>
+        </div>
+        <div class="card-content" id="nutritionCard">
+          <h3>Nutrition List</h3>
+          <div id="nutritionBars"></div>
+        </div>
+        <div class="card-content hidden" id="treeStatusCard">
+          <h3>Tree Status</h3>
+          <div id="treeProgress"></div>
+          <h3>Carbon Emission</h3>
+          <div id="ceDisplay">0 kg CO₂</div>
+        </div>
+      </div>
+    </div>
+    <div id="cameraBtn" onclick="openCamera()">
+      <img src="/img/UI/CameraUI.png">
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div id="topBar">
+    <div class="top-icon" onclick="openPanel('shop')"><img src="/img/UI/ShopUI.png"></div>
+    <div class="top-icon" onclick="openPanel('ranking')"><img src="/img/UI/RankingUI.png"></div>
+    <div class="top-icon" id="currencyDisplay" onclick="openPanel('currency')">
+      <img src="/img/UI/CurrencyUI.png"><span id="currencyVal">30</span>
+    </div>
+    <div id="timeDisplay">--:--</div>
+    <div class="top-icon" onclick="openPanel('tasks')"><img src="/img/UI/TasksUI.png"></div>
+    <div class="top-icon" onclick="openPanel('settings')"><img src="/img/UI/SettingUI.png"></div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div id="bottomBar">
+    <div class="bot-icon" id="waterBtn" onpointerdown="startAction('water',event)">
+      <img src="/img/UI/WateringUI.png" draggable="false">
+      <div id="waterCooldown" class="cooldown-badge hidden">0:00</div>
+    </div>
+    <div class="bot-icon" id="fertBtn" onpointerdown="startAction('fertilize',event)">
+      <img src="/img/UI/FertilizerUI.png" draggable="false">
+    </div>
+    <div class="bot-icon" onclick="openDecoBar()">
+      <img src="/img/UI/DecorateUI.png" draggable="false">
+    </div>
+    <div class="bot-icon" onclick="openPanel('recipe')">
+      <img src="/img/UI/RecipeUI.png" draggable="false">
+    </div>
+  </div>
+
+  <!-- Deco bar -->
+  <div id="decoBar" class="hidden">
+    <div id="decoBarList"></div>
+    <div class="deco-close" onclick="closeDecoBar()">✕</div>
+  </div>
+</div>
+
+<!-- ===== CAMERA PAGE ===== -->
+<div id="cameraPage" class="page hidden">
+  <div id="cameraReturn" onclick="closeCamera()"><img src="/img/UI/ReturnButton.png"></div>
+  <!-- Mode selector -->
+  <div id="cameraModeBar">
+    <button class="cam-mode-btn active" data-mode="summary" onclick="setCameraMode('summary')" title="Scan your meal to analyze nutrition & carbon footprint">📊 Summary</button>
+    <button class="cam-mode-btn" data-mode="suggestion" onclick="setCameraMode('suggestion')" title="Scan your fridge to get recipe suggestions">🍳 Suggestion</button>
+  </div>
+  <div id="cameraModeHint" class="cam-hint">Scan your meal to analyze nutrition & carbon footprint</div>
+  <video id="cameraVideo" autoplay playsinline></video>
+  <canvas id="cameraCanvas" class="hidden"></canvas>
+  <div id="cameraShutter" onclick="takePhoto()"><img src="/img/UI/CameraUI.png"></div>
+  <!-- Loading overlay -->
+  <div id="cameraLoading" class="hidden">
+    <div class="loading-spinner"></div>
+    <p id="loadingText">Analyzing your meal...</p>
+    <button class="btn-cancel" onclick="closeCamera()">Cancel</button>
+  </div>
+</div>
+
+<!-- ===== SUMMARY RESULTS PAGE ===== -->
+<div id="summaryResultPage" class="page hidden">
+  <div class="result-return" onclick="closeSummaryResult()"><img src="/img/UI/ReturnButton.png"></div>
+  <div id="summaryBgImg" class="summary-bg"></div>
+  <div id="summaryPullCard" class="summary-card">
+    <div class="summary-handle"></div>
+    <h3>Food Analysis</h3>
+    <div id="summaryTable"></div>
+    <div id="summaryTotalCarbon"></div>
+    <!-- Personal feedback bubble -->
+    <div id="feedbackBubble" class="hidden">
+      <div id="feedbackEmoji">🌱</div>
+      <div id="feedbackText"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUGGESTION RESULTS PAGE ===== -->
+<div id="suggestionResultPage" class="page hidden">
+  <div class="result-return" onclick="closeSuggestionResult()"><img src="/img/UI/ReturnButton.png"></div>
+  <h2 class="suggest-title">🍳 Recipe Suggestions</h2>
+  <div id="detectedFoods" class="suggest-section"></div>
+  <div id="suggestedRecipes" class="suggest-section"></div>
+</div>
+
+<!-- ===== PANELS (overlays) ===== -->
+<!-- Register -->
+<div id="registerPanel" class="panel-overlay hidden">
+  <div class="panel-card register-card">
+    <h2>Hello！</h2>
+    <h3>How Should we call you?</h3>
+    <input id="regName" placeholder="type your name here">
+    <h3>What is your e-mail?</h3>
+    <input id="regEmail" placeholder="type your e-mail here">
+    <h3>What is your gender?</h3>
+    <div class="gender-row">
+      <button class="gender-btn selected" data-g="Male" onclick="selectGender(this)">Male</button>
+      <button class="gender-btn" data-g="Female" onclick="selectGender(this)">Female</button>
+    </div>
+    <h3>Which is your avatar?</h3>
+    <div class="avatar-row">
+      <img id="regAvatarPreview" src="/img/UI/head/man.png" class="avatar-preview">
+      <button class="btn-green" onclick="showAvatarPicker('reg')">Change my avatar</button>
+    </div>
+    <div class="register-footer">
+      <a href="#" onclick="showLoginPanel()">Login through e-mail</a>
+      <button class="btn-green" onclick="doRegister()">Accept</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login -->
+<div id="loginPanel" class="panel-overlay hidden">
+  <div class="panel-card login-card">
+    <div class="panel-return" onclick="showRegisterPanel()">< Return</div>
+    <h2>Login</h2>
+    <input id="loginEmail" placeholder="type your e-mail here">
+    <div class="verify-row">
+      <input id="loginCode" placeholder="type your verified code">
+      <button class="btn-green btn-sm" onclick="sendVerification('login',this)">send Verification</button>
+    </div>
+    <button class="btn-green" onclick="doLogin()">Accept</button>
+  </div>
+</div>
+
+<!-- Shop -->
+<div id="shopPanel" class="panel-overlay hidden">
+  <div class="panel-card full-card">
+    <div class="panel-header">
+      <img src="/img/UI/ShopUI.png" class="panel-icon"><span>Decoration Shop</span>
+      <div class="panel-close" onclick="closePanel('shop')"><img src="/img/UI/ReturnButton.png"></div>
+    </div>
+    <div class="panel-scroll" id="shopList"></div>
+  </div>
+</div>
+
+<!-- Ranking -->
+<div id="rankingPanel" class="panel-overlay hidden">
+  <div class="panel-card full-card">
+    <div class="panel-header">
+      <img src="/img/UI/RankingUI.png" class="panel-icon"><span>Ranking List</span>
+      <div class="rank-tabs">
+        <button class="rank-tab active" onclick="loadRanking('carbon')">Carbon</button>
+        <button class="rank-tab" onclick="loadRanking('nutrition')">Nutrition</button>
+      </div>
+      <div class="panel-close" onclick="closePanel('ranking')"><img src="/img/UI/ReturnButton.png"></div>
+    </div>
+    <div class="panel-scroll" id="rankingList"></div>
+    <div id="rankingSelf" class="ranking-self"></div>
+  </div>
+</div>
+
+<!-- Tasks (Recent Scans) -->
+<div id="tasksPanel" class="panel-overlay hidden">
+  <div class="panel-card full-card">
+    <div class="panel-header">
+      <img src="/img/UI/TasksUI.png" class="panel-icon"><span>Recent Tasks</span>
+      <div class="panel-close" onclick="closePanel('tasks')"><img src="/img/UI/ReturnButton.png"></div>
+    </div>
+    <div class="panel-scroll" id="tasksList"></div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settingsPanel" class="panel-overlay hidden">
+  <div class="panel-card full-card settings-card">
+    <div class="panel-header">
+      <img src="/img/UI/SettingUI.png" class="panel-icon"><span>Setting</span>
+      <div class="panel-close" onclick="closePanel('settings')"><img src="/img/UI/ReturnButton.png"></div>
+    </div>
+    <div class="panel-scroll settings-body">
+      <div class="settings-avatar">
+        <img id="settingsAvatarImg" src="/img/UI/head/man.png" class="avatar-big">
+        <button class="btn-green" onclick="showAvatarPicker('settings')">Change my avatar</button>
+      </div>
+      <div class="settings-section">
+        <h3>Name</h3>
+        <span id="settingsName">-</span>
+        <button class="btn-green btn-sm" onclick="changeName()">Change my Name</button>
+      </div>
+      <div class="settings-section">
+        <h3>ID</h3>
+        <span id="settingsId">-</span>
+      </div>
+      <div class="settings-section">
+        <h3>Email</h3>
+        <span id="settingsEmail">-</span>
+        <div class="verify-row">
+          <input id="settingsVerifyCode" placeholder="type your verified code">
+          <button class="btn-green btn-sm" onclick="sendVerification('settings',this)">send Verification</button>
+          <button id="settingsConfirmBtn" class="btn-green btn-sm" onclick="confirmEmailCode(this)">Confirm</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <p>Carbon emissions: <span id="settingsCE">0</span></p>
+        <p>Nutrition: <span id="settingsNS">0</span></p>
+      </div>
+      <div class="settings-section">
+        <h3>Log in your prev Account Through Email:</h3>
+        <input id="settingsSwitchEmail" placeholder="type your email">
+        <div class="verify-row">
+          <input id="settingsSwitchCode" placeholder="type your verified code">
+          <button class="btn-green btn-sm" onclick="sendVerification('switch',this)">send Verification</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logoutAccount()">Log Out</button>
+  </div>
+</div>
+
+<!-- Recipe Suggestion Panel -->
+<div id="recipePanel" class="panel-overlay hidden">
+  <div class="panel-card full-card">
+    <div class="panel-header">
+      <img src="/img/UI/RecipeUI.png" class="panel-icon"><span>Suggestions</span>
+      <div class="panel-close" onclick="closePanel('recipe')"><img src="/img/UI/ReturnButton.png"></div>
+    </div>
+    <!-- Category tabs -->
+    <div class="recipe-tabs">
+      <button class="recipe-tab active" onclick="switchRecipeTab('saved')">Saved Recipes</button>
+      <button class="recipe-tab" onclick="switchRecipeTab('delivery')">Delivery</button>
+    </div>
+    <div class="panel-scroll" id="recipeSavedList"></div>
+    <div class="panel-scroll hidden" id="recipeDeliveryList"></div>
+  </div>
+</div>
+
+<!-- Avatar Picker -->
+<div id="avatarPicker" class="panel-overlay hidden">
+  <div class="panel-card">
+    <h3>Choose Avatar</h3>
+    <div id="avatarGrid" class="avatar-grid"></div>
+  </div>
+</div>
+
+<!-- Drag item & animation (outside #mainPage to avoid transform:scale breaking position:fixed) -->
+<img id="dragItem" class="drag-item hidden">
+<img id="actionAnime" class="action-anime hidden">
+<div id="gameToast" class="game-toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/daynight.js"></script>
+<script src="/js/clouds.js"></script>
+<script src="/js/game.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/camera.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

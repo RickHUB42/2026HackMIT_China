@@ -1,0 +1,242 @@
+@font-face { font-family:'Fortnite'; src:url('/Fonts/Fortnite.otf'); }
+@font-face { font-family:'GillSans'; src:url('/Fonts/GillSansDisplayMT.otf'); }
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'GillSans',sans-serif;overflow:auto;background:#1a1a2e;color:#fff;user-select:none;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+h1,h2,h3{font-family:'Fortnite',sans-serif;}
+button{font-family:'GillSans',sans-serif;}
+input{font-family:'GillSans',sans-serif;background:#2a2a4a;border:1px solid #444;color:#fff;padding:8px 12px;border-radius:6px;width:100%;}
+.hidden{display:none!important;}
+.btn-green{background:#2ecc40;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:'GillSans',sans-serif;font-size:14px;cursor:pointer;}
+.btn-green:active{background:#27ae35;}
+.btn-sm{font-size:12px;padding:5px 10px;}
+
+/* Layout */
+#mainPage{width:420px;height:750px;display:flex;flex-direction:column;position:relative;overflow:hidden;flex-shrink:0;}
+#topBar{position:absolute;top:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:rgba(0,0,0,0.5);z-index:100;gap:4px;}
+.top-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.top-icon img{width:36px;height:36px;object-fit:contain;}
+#currencyDisplay{display:flex;align-items:center;gap:4px;font-family:'Fortnite',sans-serif;font-size:14px;}
+#currencyDisplay img{width:24px;height:24px;}
+#timeDisplay{font-family:'Fortnite',sans-serif;font-size:14px;white-space:nowrap;}
+
+#bottomBar,#decoBar{position:absolute;bottom:0;left:0;right:0;height:80px;display:flex;align-items:center;justify-content:space-around;padding:8px;background:rgba(0,0,0,0.6);z-index:100;}
+.bot-icon{width:70px;height:70px;border:2px solid #555;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;background:rgba(0,0,0,0.3);}
+.bot-icon img,.top-icon img{width:50px;height:50px;object-fit:contain;-webkit-user-drag:none;user-select:none;pointer-events:none;}
+.cooldown-badge{position:absolute;top:-8px;left:-8px;background:#e74c3c;color:#fff;font-size:10px;padding:2px 5px;border-radius:8px;font-family:'Fortnite',sans-serif;}
+
+#decoBar{overflow-x:auto;justify-content:flex-start;gap:8px;padding-right:40px;}
+#decoBarList{display:flex;gap:8px;overflow-x:auto;flex:1;}
+.deco-slot{width:60px;height:60px;border:2px solid #555;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:grab;position:relative;background:rgba(0,0,0,0.3);}
+.deco-slot.empty{opacity:0.4;}
+.deco-slot img{width:40px;height:40px;object-fit:contain;}
+.deco-slot .deco-qty{position:absolute;bottom:2px;right:4px;font-size:10px;background:rgba(0,0,0,0.7);padding:1px 4px;border-radius:4px;}
+.deco-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:24px;cursor:pointer;color:#fff;}
+
+/* Game Area */
+#gameArea{flex:1;position:relative;overflow:hidden;}
+#skyGradient{position:absolute;inset:0;z-index:0;transition:background 2s;}
+.bg-layer{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;min-height:60%;object-fit:cover;z-index:1;transition:opacity 2s;}
+.tree-layer{position:absolute;left:50%;transform:translateX(-50%);object-fit:contain;z-index:3;transition:opacity 2s;}
+.celestial{position:absolute;z-index:2;width:60px;height:60px;object-fit:contain;transition:opacity 1s;}
+#sunImg{width:80px;height:80px;}
+
+/* Clouds */
+#cloudsContainer{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.cloud{position:absolute;height:auto;opacity:0.9;transition:filter 2s;}
+
+/* Placed decorations */
+#placedDecos{position:absolute;inset:0;z-index:4;pointer-events:none;}
+.placed-deco{position:absolute;width:30px;height:30px;object-fit:contain;}
+
+/* Info Cards */
+.info-card{position:absolute;z-index:10;top:20%;width:55%;height:50%;background:rgba(30,40,70,0.85);border-radius:12px;transition:transform 0.4s ease;display:flex;overflow:hidden;}
+.card-left{left:0;transform:translateX(-90%);flex-direction:row;}
+.card-left.open{transform:translateX(0);}
+.card-right{right:0;transform:translateX(90%);flex-direction:row;}
+.card-right.open{transform:translateX(0);}
+.card-tab{writing-mode:vertical-rl;padding:8px 4px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);font-size:18px;min-width:24px;flex-shrink:0;}
+.card-inner{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.card-tabs{display:flex;z-index:2;background:rgba(0,0,0,0.4);flex-shrink:0;}
+.card-tab-btn{padding:6px 10px;font-size:11px;cursor:pointer;opacity:0.6;font-family:'Fortnite',sans-serif;}
+.card-tab-btn.active{opacity:1;border-bottom:2px solid #2ecc40;}
+.card-content{flex:1;padding:12px;overflow-y:auto;}
+.card-content h3{font-size:14px;margin-bottom:8px;}
+
+/* Nutrition bars */
+.nutri-bar{margin-bottom:6px;}
+.nutri-bar label{font-size:10px;display:block;}
+.nutri-bar-track{height:10px;background:#333;border-radius:5px;overflow:hidden;}
+.nutri-bar-fill{height:100%;background:linear-gradient(90deg,#2ecc40,#27ae60);border-radius:5px;transition:width 0.5s;}
+
+/* Tree progress */
+.tree-prog{margin:8px 0;}
+.tree-prog-label{font-size:12px;text-align:center;margin-bottom:4px;}
+.tree-prog-track{height:14px;background:#333;border-radius:7px;overflow:hidden;position:relative;}
+.tree-prog-fill{height:100%;background:linear-gradient(90deg,#f39c12,#e67e22);border-radius:7px;transition:width 0.5s;}
+
+/* Camera button */
+#cameraBtn{position:absolute;bottom:88px;left:12px;width:56px;height:56px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;z-index:50;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+#cameraBtn img{width:36px;height:36px;object-fit:contain;}
+
+/* Toast */
+.game-toast{position:fixed;top:18%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 22px;border-radius:12px;font-family:'GillSans',sans-serif;font-size:14px;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;text-align:center;max-width:80vw;}
+.game-toast.show{opacity:1;}
+/* Drag item */
+.drag-item{position:fixed;width:60px;height:60px;object-fit:contain;pointer-events:none;z-index:200;transition:filter 0.15s;}
+.drag-item.highlight{filter:drop-shadow(0 0 12px #2ecc40) drop-shadow(0 0 24px #2ecc40);}
+/* Tree drop zone indicator */
+.tree-layer.drop-hover{filter:drop-shadow(0 0 16px rgba(46,204,64,0.6));}
+.action-anime{position:fixed;width:120px;height:120px;object-fit:contain;z-index:201;pointer-events:none;}
+
+/* Camera Page */
+#cameraPage{position:fixed;inset:0;background:#333;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#cameraVideo{width:100%;height:100%;object-fit:cover;}
+#cameraReturn{position:absolute;top:12px;right:12px;z-index:501;cursor:pointer;}
+#cameraReturn img{width:48px;height:48px;}
+#cameraShutter{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:72px;height:72px;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:501;}
+#cameraShutter img{width:40px;height:40px;object-fit:contain;}
+
+/* Camera mode bar */
+#cameraModeBar{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:502;display:flex;gap:4px;background:rgba(0,0,0,0.6);border-radius:20px;padding:4px;}
+.cam-mode-btn{background:transparent;color:#fff;border:none;padding:8px 16px;border-radius:16px;font-family:'GillSans',sans-serif;font-size:13px;cursor:pointer;transition:background 0.2s;}
+.cam-mode-btn.active{background:#2ecc40;color:#fff;}
+.cam-hint{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:502;color:rgba(255,255,255,0.7);font-size:11px;text-align:center;white-space:nowrap;}
+
+/* Camera loading */
+#cameraLoading{position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:510;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,0.2);border-top-color:#2ecc40;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-cancel{background:none;border:1px solid rgba(255,255,255,0.5);color:#fff;padding:8px 24px;border-radius:20px;font-size:13px;cursor:pointer;margin-top:8px;}
+#cameraLoading p{color:#fff;font-size:14px;}
+
+/* Summary Result Page */
+#summaryResultPage{position:fixed;inset:0;background:#1a1a2e;z-index:500;display:flex;flex-direction:column;}
+.result-return{position:absolute;top:12px;right:12px;z-index:501;cursor:pointer;}
+.result-return img{width:48px;height:48px;}
+.summary-bg{width:100%;height:45%;background-size:cover;background-position:center;flex-shrink:0;}
+.summary-card{flex:1;background:#f0e6d3;color:#333;border-radius:20px 20px 0 0;margin-top:-20px;padding:16px;overflow-y:auto;position:relative;z-index:1;}
+.summary-handle{width:40px;height:4px;background:#ccc;border-radius:2px;margin:0 auto 12px;}
+.summary-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;}
+.summary-table th{background:#333;color:#fff;padding:6px 8px;text-align:left;font-family:'Fortnite',sans-serif;font-size:11px;}
+.summary-table td{padding:6px 8px;border-bottom:1px solid #ddd;}
+.carbon-total{font-size:14px;margin:8px 0;padding:8px;background:#e8f5e9;border-radius:8px;text-align:center;}
+
+/* Feedback bubble */
+#feedbackBubble{margin-top:12px;background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;gap:10px;align-items:flex-start;}
+#feedbackEmoji{font-size:28px;flex-shrink:0;}
+#feedbackText{font-size:12px;line-height:1.5;color:#444;}
+
+/* Suggestion Result Page */
+#suggestionResultPage{position:fixed;inset:0;background:#f0e6d3;color:#333;z-index:500;overflow-y:auto;padding:16px;padding-top:60px;}
+.suggest-title{text-align:center;margin-bottom:16px;font-size:22px;}
+.suggest-section{margin-bottom:16px;}
+.suggest-section h3{font-size:16px;margin-bottom:8px;font-family:'Fortnite',sans-serif;}
+.food-tag{display:inline-block;background:#2ecc40;color:#fff;padding:4px 10px;border-radius:12px;font-size:12px;margin:2px;}
+.recipe-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.recipe-card h4{font-size:14px;margin-bottom:4px;font-family:'Fortnite',sans-serif;}
+.recipe-ing{font-size:11px;color:#666;margin-bottom:8px;max-height:60px;overflow:hidden;}
+
+/* PANELS */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.25s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel-card{background:#f0e6d3;color:#333;border-radius:16px;width:90%;max-width:420px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;animation:slideUp 0.3s;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.full-card{height:80vh;}
+.panel-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:2px solid #ccc;flex-shrink:0;}
+.panel-header span{font-family:'Fortnite',sans-serif;font-size:20px;flex:1;}
+.panel-icon{width:32px;height:32px;object-fit:contain;}
+.panel-close{cursor:pointer;}
+.panel-close img{width:36px;height:36px;}
+.panel-scroll{flex:1;overflow-y:auto;padding:12px;}
+.panel-return{font-family:'Fortnite',sans-serif;font-size:18px;padding:12px;cursor:pointer;}
+
+/* Register/Login */
+.register-card,.login-card{padding:20px;gap:10px;}
+.register-card h2,.login-card h2{font-size:28px;color:#333;}
+.register-card h3,.login-card h3{font-size:16px;color:#333;margin-top:8px;}
+.register-card input,.login-card input{background:#2a2a4a;color:#fff;}
+.gender-row{display:flex;gap:12px;margin:8px 0;}
+.gender-btn{padding:8px 24px;border-radius:8px;border:none;font-family:'GillSans',sans-serif;font-size:14px;cursor:pointer;background:#888;color:#fff;}
+.gender-btn.selected{background:#2ecc40;}
+.avatar-row{display:flex;align-items:center;gap:12px;margin:8px 0;}
+.avatar-preview{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#888;}
+.register-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.register-footer a{color:#2a2a4a;font-size:13px;text-decoration:underline;}
+.verify-row{display:flex;gap:8px;align-items:center;margin:8px 0;}
+.verify-row input{flex:1;}
+
+/* Shop */
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.shop-item{background:#fff;border-radius:10px;padding:8px;text-align:center;cursor:pointer;}
+.shop-item img{width:48px;height:48px;object-fit:contain;}
+.shop-item p{font-size:11px;margin:4px 0;}
+.shop-item .price{color:#e67e22;font-family:'Fortnite',sans-serif;}
+
+/* Ranking */
+.rank-tabs{display:flex;gap:4px;}
+.rank-tab{padding:4px 10px;border:1px solid #333;border-radius:6px;font-size:12px;cursor:pointer;background:#fff;color:#333;font-family:'Fortnite',sans-serif;}
+.rank-tab.active{background:#333;color:#fff;}
+.rank-row{display:flex;align-items:center;padding:10px 8px;border-bottom:1px solid #ccc;gap:10px;}
+.rank-row img{width:36px;height:36px;border-radius:8px;background:#ccc;object-fit:cover;}
+.rank-info{flex:1;}
+.rank-info strong{font-size:14px;}
+.rank-info small{font-size:11px;color:#666;}
+.rank-num{font-family:'Fortnite',sans-serif;font-size:22px;color:#333;}
+.ranking-self{border-top:2px solid #333;padding:10px;background:#e8dcc8;}
+
+/* Tasks / Scan history */
+.task-row{padding:10px;border-bottom:1px solid #ccc;font-size:14px;}
+.task-row small{color:#888;font-size:11px;}
+.scan-pack{padding:10px;margin:4px 8px;border-radius:8px;display:flex;align-items:center;gap:8px;font-size:13px;}
+.scan-summary{border:2px solid #3498db;background:rgba(52,152,219,0.08);}
+.scan-suggestion{border:2px solid #2ecc40;background:rgba(46,204,64,0.08);}
+.scan-mode{font-weight:bold;}
+.scan-carbon{margin-left:auto;color:#e67e22;font-size:12px;}
+
+/* Settings */
+.settings-card{color:#333;position:relative;}
+.settings-body{padding:16px;}
+.btn-logout{position:absolute;bottom:12px;right:12px;background:#e74c3c;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:'GillSans',sans-serif;font-size:13px;cursor:pointer;}
+.btn-logout:active{background:#c0392b;}
+.settings-avatar{text-align:center;margin-bottom:16px;}
+.avatar-big{width:80px;height:80px;border-radius:16px;background:#ccc;object-fit:cover;display:block;margin:0 auto 8px;}
+.settings-section{margin-bottom:14px;}
+.settings-section h3{font-size:16px;margin-bottom:4px;}
+.settings-section span{font-size:14px;color:#555;}
+.settings-section p{font-size:13px;margin:2px 0;}
+
+/* Recipe panel tabs */
+.recipe-tabs{display:flex;border-bottom:2px solid #ccc;flex-shrink:0;}
+.recipe-tab{flex:1;padding:10px;text-align:center;font-family:'Fortnite',sans-serif;font-size:14px;cursor:pointer;background:transparent;border:none;color:#888;}
+.recipe-tab.active{color:#333;border-bottom:3px solid #2ecc40;}
+
+/* Saved recipes */
+.saved-recipe{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;position:relative;}
+.saved-recipe h4{font-size:14px;font-family:'Fortnite',sans-serif;margin-bottom:4px;}
+.btn-del{position:absolute;top:8px;right:8px;background:#e74c3c;color:#fff;border:none;width:24px;height:24px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* Delivery list */
+.delivery-list{display:flex;flex-direction:column;gap:6px;}
+.delivery-row{display:flex;align-items:center;gap:8px;background:#fff;border-radius:8px;padding:4px 8px;}
+.delivery-num{font-weight:bold;font-size:14px;color:#555;min-width:16px;text-align:center;}
+.delivery-row img{width:70px;height:70px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+.delivery-name{font-size:11px;color:#333;}
+.delivery-note{text-align:center;font-size:10px;color:#999;margin-top:8px;}
+
+/* Avatar picker */
+.avatar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;}
+.avatar-grid img{width:60px;height:60px;border-radius:12px;cursor:pointer;border:3px solid transparent;object-fit:cover;background:#ccc;}
+.avatar-grid img:hover,.avatar-grid img.selected{border-color:#2ecc40;}
+
+.empty-msg{text-align:center;color:#888;padding:20px;}
+
+/* Mobile: full screen portrait */
+@media(max-width:480px){
+  body{align-items:stretch;justify-content:stretch;}
+  #mainPage{width:100vw;height:100vh;height:100dvh;}
+}
+@media(min-width:481px){
+  .info-card{width:40%;height:45%;}
+  #cameraBtn{bottom:92px;left:16px;width:64px;height:64px;}
+}
